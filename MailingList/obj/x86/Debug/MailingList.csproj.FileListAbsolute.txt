@@ -1,0 +1,5 @@
+c:\users\mirko\documents\visual studio 2010\Projects\MailingList\MailingList\bin\Debug\MailingList.exe
+c:\users\mirko\documents\visual studio 2010\Projects\MailingList\MailingList\bin\Debug\MailingList.pdb
+c:\users\mirko\documents\visual studio 2010\Projects\MailingList\MailingList\obj\x86\Debug\MailingList.exe
+c:\users\mirko\documents\visual studio 2010\Projects\MailingList\MailingList\obj\x86\Debug\MailingList.pdb
+C:\Users\Mirko\documents\visual studio 2010\Projects\MailingList\MailingList\obj\x86\Debug\MailingList.csprojResolveAssemblyReference.cache

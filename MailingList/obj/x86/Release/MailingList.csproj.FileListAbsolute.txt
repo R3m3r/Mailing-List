@@ -1,0 +1,15 @@
+C:\Users\Mirko\documents\visual studio 2010\Projects\MailingList\MailingList\bin\Release\MailingList.exe
+C:\Users\Mirko\documents\visual studio 2010\Projects\MailingList\MailingList\bin\Release\MailingList.pdb
+C:\Users\Mirko\documents\visual studio 2010\Projects\MailingList\MailingList\obj\x86\Release\MailingList.exe
+C:\Users\Mirko\documents\visual studio 2010\Projects\MailingList\MailingList\obj\x86\Release\MailingList.pdb
+C:\Users\Mirko\documents\visual studio 2010\Projects\MailingList\MailingList\obj\x86\Release\MailingList.csprojResolveAssemblyReference.cache
+B:\Dropbox\Università\Compilatori\MailingList\MailingList\obj\x86\Release\MailingList.exe
+B:\Dropbox\Università\Compilatori\MailingList\MailingList\obj\x86\Release\MailingList.pdb
+B:\Dropbox\Università\Compilatori\MailingList\MailingList\bin\Release\MailingList.exe
+B:\Dropbox\Università\Compilatori\MailingList\MailingList\bin\Release\MailingList.pdb
+B:\Dropbox\Università\Compilatori\MailingList\MailingList\obj\x86\Release\MailingList.csprojResolveAssemblyReference.cache
+B:\Dropbox\Università\Compilatori\progetti Mirko\MailingList\MailingList\obj\x86\Release\MailingList.exe
+B:\Dropbox\Università\Compilatori\progetti Mirko\MailingList\MailingList\obj\x86\Release\MailingList.pdb
+B:\Dropbox\Università\Compilatori\progetti Mirko\MailingList\MailingList\bin\Release\MailingList.exe
+B:\Dropbox\Università\Compilatori\progetti Mirko\MailingList\MailingList\bin\Release\MailingList.pdb
+B:\Dropbox\Università\Compilatori\progetti Mirko\MailingList\MailingList\obj\x86\Release\MailingList.csprojResolveAssemblyReference.cache
