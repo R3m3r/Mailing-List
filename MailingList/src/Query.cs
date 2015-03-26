@@ -23,12 +23,15 @@ namespace MailingList
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query_sql, database.GetSqlConnection());
-                //Console.WriteLine(query_sql);
+                Message.ShowMessage(query_sql, Verbosity_Level.E_Debug);
                 cmd.ExecuteNonQuery();
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                if (ex.Message.StartsWith("Duplicate entry"))
+                    Message.ShowMessage(ex.Message, Verbosity_Level.E_Warning);
+                else
+                    Console.WriteLine(ex.Message);
                 return false;
             }
             return true;
@@ -40,12 +43,12 @@ namespace MailingList
             try
             {
                 MySqlCommand cmd = new MySqlCommand(query_sql, database.GetSqlConnection());
-                //Console.WriteLine(query_sql);
+                Message.ShowMessage(query_sql, Verbosity_Level.E_Debug);
                 reader = cmd.ExecuteReader();
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine("Error : {0}", ex.Message);
+                Message.ShowMessage("Error: {0}", Verbosity_Level.E_Error, ex.Message);
                 return false;
             }
             return true;

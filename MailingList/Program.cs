@@ -9,8 +9,6 @@ using MySql.Data.MySqlClient;
 
 namespace MailingList
 {
-    //FARE VERBOSITY LEVEL NELLE FUNZIONI Email_insert ecc.
-    //FARE OGNI Writeline con il formato {0}, {1}
     class Program
     {
         static DatabaseConnection db = DatabaseConnection.Instance;
@@ -18,7 +16,22 @@ namespace MailingList
 
         static void Main(string[] args)
         {
-            Message.Verbosity = Verbosity_Level.E_Notice | Verbosity_Level.E_Warning;
+            Message.Verbosity = Verbosity_Level.E_None;
+
+            if (args != null)
+            {
+                foreach (string arg in args)
+                {
+                    if (arg.Equals("-d"))
+                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Debug;
+                    else if (arg.Equals("-w"))
+                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Warning;
+                    else if (arg.Equals("-e"))
+                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Error;
+                    else if (arg.Equals("-n"))
+                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Notice;
+                }
+            }
 
             Message.ShowMessage("Welcome to Mailing List Manager", Verbosity_Level.E_Notice);
 
@@ -37,26 +50,25 @@ namespace MailingList
             string host = "localhost", username = "root", password = "", db_name = "email";
 
             Query query_create_table = new QueryCreateTable("Address")
-                                                .Fields("address_id varchar(150) NOT NULL", "local_part varchar(70) NOT NULL", 
+                                                .Fields("address_id varchar(150) NOT NULL", "local_part varchar(70) NOT NULL",
                                                         "domain_part varchar(25) NOT NULL", "invalid_domain int(1)")
                                                 .PrimaryKey("address_id").Build();
             Query query_create_domain_table = new QueryCreateTable("Domain_part").Fields("domain_part varchar(25) NOT NULL", "invalid_domain int(1)").PrimaryKey("domain_part").Build();
             Query query_warning_table = new QueryCreateTable("Warning").Fields("mail varchar(255) NOT NULL").PrimaryKey("mail").Build();
 
-            //IMPLEMENTARE WARNING
             if (db.Connect(host, username, password, db_name))
             {
                 query_create_table.ExecuteQuery(db);
                 query_create_domain_table.ExecuteQuery(db);
                 query_warning_table.ExecuteQuery(db);
             }
-            else 
+            else
             {
-                if(db.Connect(host, username, password))
+                if (db.Connect(host, username, password))
                 {
                     if (db.CreateDatabase(db_name))
                     {
-                        if(db.SelectDatabase(db_name))
+                        if (db.SelectDatabase(db_name))
                         {
                             query_create_table.ExecuteQuery(db);
                             query_create_domain_table.ExecuteQuery(db);
@@ -91,7 +103,7 @@ namespace MailingList
                                 "\n 6. Export the database to .txt files" +
                                 "\n 7. PING: check which mail servers respond" +
                                 "\n 8. Exit" +
-                                "\n*******************************************" );
+                                "\n*******************************************");
 
             bool exit = false;
             do
@@ -115,13 +127,13 @@ namespace MailingList
                         email = Console.ReadLine();
                         Insert_Email_Address(email);
                         break;
-                    
+
                     case "3":
                         Console.WriteLine("Enter an e-mail: ");
                         email = Console.ReadLine();
                         Delete_Email_Address(email);
                         break;
-                    
+
                     case "4":
                         Console.WriteLine("Enter a file path: ");
                         path = Console.ReadLine();
@@ -138,14 +150,14 @@ namespace MailingList
                         Console.WriteLine("Enter a directory path :");
                         directory_path = Console.ReadLine();
                         Export_Alphabetical_Emails(directory_path);
-                        Export_All_Emails(directory_path);
+                        Export_All_Emails(directory_path + "/all_emails.txt");
                         break;
 
-                    case "7" :
+                    case "7":
                         Ping_Domains();
                         break;
 
-                    case "8" :
+                    case "8":
                         exit = true;
                         break;
 
@@ -153,14 +165,14 @@ namespace MailingList
                         break;
                 }
             }
-            while(exit == false);
+            while (exit == false);
         }
 
         public static void Parse_Directory(string directory_path)
         {
             try
             {
-                Message.ShowMessage("Parsing Directory {0}", Verbosity_Level.E_Notice, directory_path);
+                Message.ShowMessage("Parsing Directory {0} ...", Verbosity_Level.E_Notice, directory_path);
                 var files = Directory.EnumerateFiles(directory_path);
                 foreach (var file in files)
                     Parse_File(file);
@@ -168,6 +180,10 @@ namespace MailingList
             catch (Exception ex)
             {
                 Message.ShowMessage(ex.Message, Verbosity_Level.E_Error);
+            }
+            finally
+            {
+                Message.ShowMessage("Done.", Verbosity_Level.E_Notice);
             }
         }
 
@@ -189,23 +205,29 @@ namespace MailingList
         //500 alla volta
         public static void Export_Alphabetical_Emails(string directory_path)
         {
+            MySqlDataReader reader = null;
             try
             {
                 Directory.CreateDirectory(directory_path);
                 foreach (char c in SYMBOL_TABLE)
                 {
                     Query query = new QuerySelectFromTable("Address").Fields("address_id").WhereFields("local_part").Like("'" + c + "%'").Build();
-                    MySqlDataReader reader;
                     if (query.ExecuteQuery(db, out reader))
                     {
                         DirectoryInfo dir = Directory.CreateDirectory(directory_path + c);
                         using (StreamWriter output = new StreamWriter(dir.FullName + "/" + c + ".txt"))
                         {
                             if (reader.HasRows)
+                            {
+                                int n_row = 0;
                                 while (reader.Read())
+                                {
                                     output.WriteLine(reader.GetString(0));
+                                    n_row++;
+                                }
+                            }
                             else
-                                Console.WriteLine("No rows found.");
+                                Message.ShowMessage("No rows found.", Verbosity_Level.E_Notice);
                         }
                     }
                     if (reader != null)
@@ -216,14 +238,16 @@ namespace MailingList
             {
                 Message.ShowMessage(ex.Message, Verbosity_Level.E_Error);
             }
+            if (reader != null)
+                reader.Close();
         }
 
         public static void Export_All_Emails(string file_path)
         {
+            MySqlDataReader reader = null;
             try
             {
                 Query query = new QuerySelectFromTable("Address").Fields("address_id").Build();
-                MySqlDataReader reader;
                 if (query.ExecuteQuery(db, out reader))
                 {
                     using (StreamWriter output = new StreamWriter(file_path))
@@ -232,16 +256,16 @@ namespace MailingList
                             while (reader.Read())
                                 output.WriteLine(reader.GetString(0));
                         else
-                            Console.WriteLine("No rows found.");
+                            Message.ShowMessage("No rows found.", Verbosity_Level.E_Notice);
                     }
                 }
-                if (reader != null)
-                    reader.Close();
             }
             catch (Exception ex)
             {
                 Message.ShowMessage(ex.Message, Verbosity_Level.E_Error);
             }
+            if (reader != null)
+                reader.Close();
         }
 
         public static void Delete_Email_From_File(string file_path)
@@ -259,7 +283,6 @@ namespace MailingList
             }
         }
 
-        //INSERIRE TABELLA WARNING
         public static void Insert_Email_Address(string email_address)
         {
             if (IsValidEmail(email_address))
@@ -270,9 +293,15 @@ namespace MailingList
                 Query query_insert_address = new QueryInsertIntoTable("Address").Fields("address_id", "local_part", "domain_part")
                                                             .Values(email_address, local_address, domain_address).Build();
                 Query query_insert_domain_part = new QueryInsertIntoTable("Domain_part").Fields("domain_part").Values(domain_address).Build();
+                Query query_warning_domain_part = new QueryInsertIntoTable("Warning").Fields("mail").Values(local_address).Build();
 
                 query_insert_address.ExecuteQuery(db);
                 query_insert_domain_part.ExecuteQuery(db);
+                if (local_address.Length > 25)
+                {
+                    query_warning_domain_part.ExecuteQuery(db);
+                    Message.ShowMessage("Email {0} insertend into warning table", Verbosity_Level.E_Warning, local_address);
+                }
             }
             else Message.ShowMessage("Failed: format is not valid!", Verbosity_Level.E_Warning);
         }
@@ -342,13 +371,13 @@ namespace MailingList
                     foreach (string domain_name in domain_names)
                     {
                         if (Ping(domain_name))
-                            Console.WriteLine(domain_name + " PONG!");
+                            Message.ShowMessage("{0} PONG!", Verbosity_Level.E_Notice, domain_name);
                         else
                         {
                             Query query_update_address = new QueryUpdateFromTable("Address").Set("invalid_domain", "1").WhereFields("domain_part").WhereValues(domain_name).Build();
                             Query query_domain_part = new QueryUpdateFromTable("Domain_part").Set("invalid_domain", "1").WhereFields("domain_part").WhereValues(domain_name).Build();
                             if (query_domain_part.ExecuteQuery(db) && query_update_address.ExecuteQuery(db))
-                                Console.WriteLine(domain_name + " is invalid. Flag inserted!");
+                                Message.ShowMessage("{0} is invalid. Flag inserted!", Verbosity_Level.E_Warning, domain_name);
                         }
                     }
                 }
@@ -365,16 +394,13 @@ namespace MailingList
             PingReply reply = pingSender.Send(address);
             if (reply.Status == IPStatus.Success)
             {
-                Console.Write("Address: {0}", reply.Address.ToString());
-                Console.Write(" RoundTrip time: {0}", reply.RoundtripTime);
-                Console.Write(" Time to live: {0}", reply.Options.Ttl);
-                Console.Write(" Don't fragment: {0}", reply.Options.DontFragment);
-                Console.Write(" Buffer size: {0}\n", reply.Buffer.Length);
+                Message.ShowMessage("Address: {0} RoundTrip time: {1} Time to live: {2} Don't fragment: {3} Buffer size: {4}", Verbosity_Level.E_Notice,
+                                        reply.Address.ToString(), reply.RoundtripTime, reply.Options.Ttl, reply.Options.DontFragment, reply.Buffer.Length);
                 return true;
             }
             else
             {
-                Console.WriteLine("Ping from address " + address + " " + reply.Status);
+                Message.ShowMessage("Ping from address {0} {1}", Verbosity_Level.E_Warning, address, reply.Status);
                 return false;
             }
         }

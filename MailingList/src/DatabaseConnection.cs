@@ -5,7 +5,6 @@ using System.Text;
 using System.Data;
 using MySql.Data.MySqlClient;
 
-//TODO: IN generale gestire meglio gli errori
 namespace MailingList
 {
     sealed class DatabaseConnection
@@ -59,8 +58,8 @@ namespace MailingList
             }
             if (success)
             {
-                Console.WriteLine("Connection Established");
-                Console.WriteLine("MySQL version : {0}", m_Connection.ServerVersion);
+                Message.ShowMessage("Connection Established", Verbosity_Level.E_Notice);
+                Message.ShowMessage("MySQL version : {0}", Verbosity_Level.E_Notice, m_Connection.ServerVersion);
             }
             return success;
         }
