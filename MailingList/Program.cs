@@ -16,20 +16,28 @@ namespace MailingList
 
         static void Main(string[] args)
         {
-            Message.Verbosity = Verbosity_Level.E_None;
+            Message.Verbosity = Verbosity_Level.E_Error | Verbosity_Level.E_Notice;
 
+            /** parsing argument **/
             if (args != null)
             {
                 foreach (string arg in args)
                 {
-                    if (arg.Equals("-d"))
-                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Debug;
-                    else if (arg.Equals("-w"))
-                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Warning;
-                    else if (arg.Equals("-e"))
-                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Error;
-                    else if (arg.Equals("-n"))
-                        Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Notice;
+                    switch (arg.ToLower())
+                    {
+                        case "-debug":
+                            Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Debug;
+                            break;
+                        case "-warning":
+                            Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Warning;
+                            break;
+                        case "-error":
+                            Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Error;
+                            break;
+                        case "-notice":
+                            Message.Verbosity = Message.Verbosity | Verbosity_Level.E_Notice;
+                            break;
+                    }
                 }
             }
 
